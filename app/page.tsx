@@ -54,7 +54,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("room")?.toUpperCase();
+    const code = new URLSearchParams(window.location.search).get("room")?.replace(/\D/g, "").slice(0, 6);
     if (code) {
       setJoinCode(code);
       loadRoom(code);
@@ -105,8 +105,8 @@ export default function Home() {
   };
 
   const enterRoom = async () => {
-    const code = joinCode.trim().toUpperCase();
-    if (code.length !== 6) return setMessage("请输入六位房间码");
+    const code = joinCode.trim();
+    if (!/^\d{6}$/.test(code)) return setMessage("请输入六位数字房间码");
     setBusy(true);
     const loaded = await loadRoom(code);
     if (loaded) {
@@ -207,7 +207,7 @@ export default function Home() {
         <section className="screen welcome">
           <p className="eyebrow">四人同局 · 各自抽取</p>
           <h1>一桌四机，<br />各选其道</h1>
-          <p className="lead">创建房间后，把六位房间码发给牌友。每个人只需选择自己的东南西北座位。</p>
+          <p className="lead">创建房间后，把六位数字房间码发给牌友。每个人只需选择自己的东南西北座位。</p>
           <div className="wind-row" aria-hidden="true">{seats.map((seat) => <span key={seat}>{seat}</span>)}</div>
 
           <section className="panel">
@@ -227,7 +227,7 @@ export default function Home() {
           <section className="panel compact">
             <label className="section-label" htmlFor="roomCode">加入已有房间</label>
             <div className="join-row">
-              <input id="roomCode" value={joinCode} onChange={(event) => setJoinCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))} placeholder="输入六位房间码" maxLength={6} />
+              <input id="roomCode" value={joinCode} onChange={(event) => setJoinCode(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="输入六位数字" maxLength={6} inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" />
               <button onClick={enterRoom} disabled={busy}>加入</button>
             </div>
           </section>

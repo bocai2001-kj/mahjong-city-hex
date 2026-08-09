@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { chooseCity, chooseRarity, type Mode } from "../../lib/game-data";
-import { getDatabase, getPlayers, getRoom, publicRoom } from "../../lib/rooms";
+import { getDatabase, getPlayers, getRoom, normalizeCode, publicRoom } from "../../lib/rooms";
 
-const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const digits = "0123456789";
 
 function roomCode() {
-  return Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  return Array.from({ length: 6 }, () => digits[Math.floor(Math.random() * digits.length)]).join("");
 }
 
 export async function POST(request: Request) {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const code = url.searchParams.get("code")?.toUpperCase() ?? "";
+  const code = normalizeCode(url.searchParams.get("code"));
   const db = getDatabase();
   const room = await getRoom(db, code);
   if (!room) return NextResponse.json({ error: "没有找到这个房间" }, { status: 404 });

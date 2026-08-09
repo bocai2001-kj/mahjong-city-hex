@@ -73,7 +73,7 @@ export function parseCandidates(value: string): Effect[] {
 }
 
 export function normalizeCode(value: unknown): string {
-  return String(value ?? "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  return String(value ?? "").trim().replace(/\D/g, "").slice(0, 6);
 }
 
 export function isSeat(value: unknown): value is Seat {
