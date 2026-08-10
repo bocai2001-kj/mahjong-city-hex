@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Effect, Mode, Rarity } from "./lib/game-data";
-import type { Seat } from "./lib/rooms";
+import { rpc } from "./lib/supabase-public";
+
+type Seat = "东" | "南" | "西" | "北";
 
 type PublicPlayer = { seat: Seat; selected: Effect | null };
 type Room = {
@@ -16,16 +18,6 @@ type Room = {
 
 const seats: Seat[] = ["东", "南", "西", "北"];
 const rarityLabels: Record<Rarity, string> = { silver: "银色", gold: "金色", prismatic: "棱彩" };
-
-async function api<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
-  });
-  const data = (await response.json()) as T & { error?: string };
-  if (!response.ok) throw new Error(data.error ?? "网络连接失败，请重试");
-  return data;
-}
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("longyan");
@@ -43,7 +35,7 @@ export default function Home() {
 
   const loadRoom = useCallback(async (code: string, quiet = false) => {
     try {
-      const result = await api<{ room: Room }>(`/api/rooms?code=${encodeURIComponent(code)}`);
+      const result = await rpc<{ room: Room }>("mahjong_get_room", { p_code: code });
       setRoom(result.room);
       if (!quiet) setMessage("");
       return result.room;
@@ -69,9 +61,10 @@ export default function Home() {
 
   const restoreSeat = useCallback(async (targetRoom: Room, seat: Seat, token: string) => {
     try {
-      const result = await api<{ candidates: Effect[]; selected: Effect | null }>(`/api/rooms/${targetRoom.code}/join`, {
-        method: "POST",
-        body: JSON.stringify({ seat, token }),
+      const result = await rpc<{ candidates: Effect[]; selected: Effect | null }>("mahjong_join_room", {
+        p_code: targetRoom.code,
+        p_seat: seat,
+        p_token: token,
       });
       setCandidates(result.candidates);
       setMySelection(result.selected);
@@ -89,9 +82,8 @@ export default function Home() {
     setBusy(true);
     setMessage("");
     try {
-      const result = await api<{ room: Room; hostToken: string }>("/api/rooms", {
-        method: "POST",
-        body: JSON.stringify({ mode }),
+      const result = await rpc<{ room: Room; hostToken: string }>("mahjong_create_room", {
+        p_mode: mode,
       });
       setRoom(result.room);
       setHostToken(result.hostToken);
@@ -122,9 +114,10 @@ export default function Home() {
     setMessage("");
     const token = localStorage.getItem(`mahjong-seat-${room?.code}-${seat}`) ?? crypto.randomUUID();
     try {
-      const result = await api<{ candidates: Effect[]; selected: Effect | null }>(`/api/rooms/${room?.code}/join`, {
-        method: "POST",
-        body: JSON.stringify({ seat, token }),
+      const result = await rpc<{ candidates: Effect[]; selected: Effect | null }>("mahjong_join_room", {
+        p_code: room?.code,
+        p_seat: seat,
+        p_token: token,
       });
       localStorage.setItem(`mahjong-seat-${room?.code}-${seat}`, token);
       setCurrentSeat(seat);
@@ -143,9 +136,11 @@ export default function Home() {
     if (!room || !currentSeat || selectedIndex === null) return;
     setBusy(true);
     try {
-      const result = await api<{ selected: Effect }>(`/api/rooms/${room.code}/select`, {
-        method: "POST",
-        body: JSON.stringify({ seat: currentSeat, token: seatToken, choiceIndex: selectedIndex }),
+      const result = await rpc<{ selected: Effect }>("mahjong_select_hex", {
+        p_code: room.code,
+        p_seat: currentSeat,
+        p_token: seatToken,
+        p_choice_index: selectedIndex,
       });
       setMySelection(result.selected);
       await loadRoom(room.code, true);
@@ -172,9 +167,9 @@ export default function Home() {
     if (!room || !hostToken) return;
     setBusy(true);
     try {
-      await api(`/api/rooms/${room.code}/next`, {
-        method: "POST",
-        body: JSON.stringify({ hostToken }),
+      await rpc("mahjong_next_round", {
+        p_code: room.code,
+        p_host_token: hostToken,
       });
       setMySelection(null);
       setCandidates([]);
