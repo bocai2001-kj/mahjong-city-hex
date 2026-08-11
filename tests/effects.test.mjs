@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import effects from "../cloudfunctions/mahjong-room/effects.cjs";
 
-const { catalogs, chooseCity, chooseRarity, createCandidates } = effects;
+const { catalogs, chooseCity, chooseRarity, drawHex } = effects;
 const modes = ["longyan", "xiamen"];
 const rarities = ["silver", "gold", "prismatic"];
 
@@ -39,15 +39,15 @@ test("every effect is named, categorized, unique, and shield-free", () => {
   assert.ok(directScoreEffects.length <= 6, "direct score effects should remain a small minority");
 });
 
-test("each offer has three unique choices with universal and local options", () => {
+test("random draws cover universal and local pools at every rarity", () => {
   for (const mode of modes) {
     for (const rarity of rarities) {
-      const choices = createCandidates(mode, rarity, () => 0.2);
-      assert.equal(choices.length, 3);
-      assert.equal(new Set(choices.map((choice) => choice.name)).size, 3);
-      assert.ok(choices.some((choice) => choice.origin === "通用"));
-      assert.ok(choices.some((choice) => choice.origin === (mode === "longyan" ? "龙岩专属" : "厦门专属")));
-      assert.ok(choices.every((choice) => choice.category));
+      const universal = drawHex(mode, rarity, () => 0);
+      const local = drawHex(mode, rarity, () => 0.999);
+      assert.equal(universal.origin, "通用");
+      assert.equal(local.origin, mode === "longyan" ? "龙岩专属" : "厦门专属");
+      assert.ok(universal.category);
+      assert.ok(local.category);
     }
   }
 });

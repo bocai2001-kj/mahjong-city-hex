@@ -113,15 +113,6 @@ const augments = {
 const effect = ([name, text, origin, category]) => ({ name, effect: text, origin, category });
 const randomItem = (items, random = Math.random) => items[Math.floor(random() * items.length)];
 
-function shuffle(items, random = Math.random) {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const other = Math.floor(random() * (index + 1));
-    [copy[index], copy[other]] = [copy[other], copy[index]];
-  }
-  return copy;
-}
-
 function chooseCity(mode, random = Math.random) {
   return effect(randomItem(random() < 0.5 ? cities.universal : cities[mode], random));
 }
@@ -131,13 +122,8 @@ function chooseRarity(random = Math.random) {
   return roll < 0.5 ? "silver" : roll < 0.85 ? "gold" : "prismatic";
 }
 
-function createCandidates(mode, rarity, random = Math.random) {
-  const universal = augments.universal[rarity];
-  const specific = augments[mode][rarity];
-  const first = randomItem(universal, random);
-  const second = randomItem(specific, random);
-  const remaining = [...universal, ...specific].filter((item) => item[0] !== first[0] && item[0] !== second[0]);
-  return shuffle([first, second, randomItem(remaining, random)], random).map(effect);
+function drawHex(mode, rarity, random = Math.random) {
+  return effect(randomItem([...augments.universal[rarity], ...augments[mode][rarity]], random));
 }
 
-module.exports = { chooseCity, chooseRarity, createCandidates, catalogs: { cities, augments } };
+module.exports = { chooseCity, chooseRarity, drawHex, catalogs: { cities, augments } };

@@ -28,8 +28,6 @@ export default function Home() {
   const [currentSeat, setCurrentSeat] = useState<Seat | null>(null);
   const [pendingSeat, setPendingSeat] = useState<Seat | null>(null);
   const [seatToken, setSeatToken] = useState("");
-  const [candidates, setCandidates] = useState<Effect[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [mySelection, setMySelection] = useState<Effect | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -62,14 +60,12 @@ export default function Home() {
 
   const restoreSeat = useCallback(async (targetRoom: Room, seat: Seat, token: string) => {
     try {
-      const result = await rpc<{ candidates: Effect[]; selected: Effect | null }>("mahjong_join_room", {
+      const result = await rpc<{ selected: Effect | null }>("mahjong_join_room", {
         p_code: targetRoom.code,
         p_seat: seat,
         p_token: token,
       });
-      setCandidates(result.candidates);
       setMySelection(result.selected);
-      setSelectedIndex(null);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "座位恢复失败");
     }
@@ -115,7 +111,7 @@ export default function Home() {
     setMessage("");
     const token = localStorage.getItem(`mahjong-seat-${room?.code}-${seat}`) ?? crypto.randomUUID();
     try {
-      const result = await rpc<{ candidates: Effect[]; selected: Effect | null }>("mahjong_join_room", {
+      const result = await rpc<{ selected: Effect | null }>("mahjong_join_room", {
         p_code: room?.code,
         p_seat: seat,
         p_token: token,
@@ -124,7 +120,6 @@ export default function Home() {
       setCurrentSeat(seat);
       setPendingSeat(null);
       setSeatToken(token);
-      setCandidates(result.candidates);
       setMySelection(result.selected);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "座位选择失败");
@@ -133,15 +128,14 @@ export default function Home() {
     }
   };
 
-  const lockChoice = async () => {
-    if (!room || !currentSeat || selectedIndex === null) return;
+  const drawHex = async () => {
+    if (!room || !currentSeat) return;
     setBusy(true);
     try {
-      const result = await rpc<{ selected: Effect }>("mahjong_select_hex", {
+      const result = await rpc<{ selected: Effect }>("mahjong_draw_hex", {
         p_code: room.code,
         p_seat: currentSeat,
         p_token: seatToken,
-        p_choice_index: selectedIndex,
       });
       setMySelection(result.selected);
       await loadRoom(room.code, true);
@@ -173,8 +167,6 @@ export default function Home() {
         p_host_token: hostToken,
       });
       setMySelection(null);
-      setCandidates([]);
-      setSelectedIndex(null);
       await loadRoom(room.code, true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "下一局开启失败");
@@ -188,7 +180,6 @@ export default function Home() {
     setCurrentSeat(null);
     setPendingSeat(null);
     setSeatToken("");
-    setCandidates([]);
     setMySelection(null);
     setMessage("");
     window.history.replaceState(null, "", "/");
@@ -268,20 +259,16 @@ export default function Home() {
         </div>
         {!currentSeat && pendingSeat && <button className="primary" onClick={() => chooseSeat(pendingSeat)} disabled={busy}>{busy ? "正在占座…" : `确认选择${pendingSeat}家`}</button>}
 
-        {currentSeat && !mySelection && candidates.length > 0 && (
+        {currentSeat && !mySelection && (
           <section className="choice-section">
             <p className="eyebrow">仅显示在你的手机</p>
-            <h2>选择一个海克斯</h2>
-            <p className="lead small">三选一，锁定后本局不能更换。</p>
-            <div className="choice-list">
-              {candidates.map((candidate, index) => (
-                <button key={candidate.name} className={selectedIndex === index ? "choice-card selected" : "choice-card"} onClick={() => setSelectedIndex(index)}>
-                  <span className="choice-number">{index + 1}</span>
-                  <span><strong>{candidate.name}</strong><small>{candidate.effect}</small><em>{candidate.origin}{candidate.category ? ` · ${candidate.category}` : ""}</em></span>
-                </button>
-              ))}
+            <h2>随机抽取海克斯</h2>
+            <p className="lead small">点击后由系统随机抽取一个海克斯，并立即锁定为你的本局效果。</p>
+            <div className="draw-preview" aria-hidden="true">
+              <span>?</span>
+              <div><strong>命运尚未揭晓</strong><small>每名玩家本局只能抽取一次</small></div>
             </div>
-            <button className="primary" onClick={lockChoice} disabled={selectedIndex === null || busy}>{busy ? "正在锁定…" : "锁定这个海克斯"}</button>
+            <button className="primary" onClick={drawHex} disabled={busy}>{busy ? "正在抽取…" : "随机抽取海克斯"}</button>
           </section>
         )}
 

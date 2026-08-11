@@ -67,14 +67,11 @@ button { color: inherit; }
 .seat-card.mine { opacity: 1; border: 2px solid var(--red); background: #f7ddd2; }
 .seat-card.pending { opacity: 1; border: 2px solid var(--gold); background: #f3e5c8; }
 .choice-section, .locked-card, .summary { margin-top: 26px; padding-top: 25px; border-top: 1px solid var(--line); }
-.choice-list { display: grid; gap: 10px; margin-top: 17px; }
-.choice-card { padding: 15px; display: grid; grid-template-columns: 42px 1fr; gap: 12px; text-align: left; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); cursor: pointer; }
-.choice-card.selected { border: 2px solid var(--red); background: #f7ddd2; }
-.choice-number { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 11px; background: var(--ink); color: white; font-weight: 800; }
-.choice-card strong, .choice-card small, .choice-card em { display: block; }
-.choice-card strong { margin-bottom: 5px; font: 700 18px Georgia, "Songti SC", serif; }
-.choice-card small { color: var(--muted); line-height: 1.55; }
-.choice-card em { margin-top: 7px; color: var(--gold); font-size: 10px; font-style: normal; font-weight: 800; }
+.draw-preview { min-height: 118px; margin-top: 17px; padding: 18px; display: grid; grid-template-columns: 58px 1fr; gap: 15px; align-items: center; border: 1px dashed rgba(155,120,55,.45); border-radius: 18px; background: linear-gradient(145deg, rgba(255,250,240,.9), rgba(238,224,197,.75)); }
+.draw-preview > span { width: 58px; height: 72px; display: grid; place-items: center; border-radius: 14px; color: #f9f1e4; background: linear-gradient(145deg, #243c33, #172b24); box-shadow: 0 10px 22px rgba(21,42,34,.18); font: 700 30px Georgia, serif; }
+.draw-preview strong, .draw-preview small { display: block; }
+.draw-preview strong { font: 700 19px Georgia, "Songti SC", serif; }
+.draw-preview small { margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.55; }
 .locked-card { padding: 25px; border: 1px solid rgba(155,120,55,.25); border-radius: 22px; background: linear-gradient(145deg, #fffaf0, #eee0c5); }
 .locked-card h2 { margin: 4px 0 12px; font: 700 28px Georgia, "Songti SC", serif; }
 .locked-card > p:not(.eyebrow) { color: var(--muted); line-height: 1.7; }

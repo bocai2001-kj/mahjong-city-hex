@@ -1,7 +1,7 @@
 "use strict";
 
 const { randomUUID } = require("node:crypto");
-const { chooseCity, chooseRarity, createCandidates } = require("./effects.cjs");
+const { chooseCity, chooseRarity, drawHex } = require("./effects.cjs");
 
 const seats = ["东", "南", "西", "北"];
 const modes = ["longyan", "xiamen"];
@@ -59,34 +59,32 @@ async function joinRoom(repository, { code, seat, token }) {
 
   let player = await repository.getPlayer(code, seat);
   if (!player) {
-    const candidate = {
+    const newPlayer = {
       roomCode: code,
       seat,
       seatToken: token,
-      candidates: createCandidates(room.mode, room.rarity),
       selected: null,
       round: room.round,
     };
-    const inserted = await repository.insertPlayer(candidate);
-    player = inserted ? candidate : await repository.getPlayer(code, seat);
+    const inserted = await repository.insertPlayer(newPlayer);
+    player = inserted ? newPlayer : await repository.getPlayer(code, seat);
   }
   if (!player || player.seatToken !== token) fail("seat_taken");
 
   return {
     seat: player.seat,
-    candidates: player.candidates,
     selected: player.selected ?? null,
     round: room.round,
   };
 }
 
-async function selectHex(repository, { code, seat, token, choiceIndex }) {
+async function selectHex(repository, { code, seat, token }, random = Math.random) {
   const player = await repository.getPlayer(code, seat);
   if (!player || player.seatToken !== token) fail("seat_verification_failed");
   if (player.selected) fail("already_selected");
-  if (!Number.isInteger(choiceIndex) || choiceIndex < 0 || choiceIndex > 2) fail("invalid_choice");
-  const selected = player.candidates[choiceIndex];
-  if (!selected) fail("invalid_choice");
+  const room = await repository.getRoom(code);
+  if (!room) fail("room_not_found");
+  const selected = drawHex(room.mode, room.rarity, random);
   await repository.updatePlayer(code, seat, { selected });
   return { selected };
 }
@@ -105,7 +103,6 @@ async function nextRound(repository, { code, hostToken }) {
   });
   const players = await repository.listPlayers(code);
   await Promise.all(players.map((player) => repository.updatePlayer(code, player.seat, {
-    candidates: createCandidates(room.mode, rarity),
     selected: null,
     round,
   })));

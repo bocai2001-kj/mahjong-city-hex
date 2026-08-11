@@ -40,7 +40,7 @@ function memoryRepository() {
   };
 }
 
-test("four-player room lifecycle works with numeric codes and private choices", async () => {
+test("four-player room lifecycle works with numeric codes and random hex draws", async () => {
   const repository = memoryRepository();
   const created = await core.createRoom(repository, { mode: "xiamen" });
 
@@ -54,8 +54,8 @@ test("four-player room lifecycle works with numeric codes and private choices", 
     seat: "东",
     token: eastToken,
   });
-  assert.equal(joined.candidates.length, 3);
   assert.equal(joined.selected, null);
+  assert.equal("candidates" in joined, false);
 
   await assert.rejects(
     core.joinRoom(repository, {
@@ -70,16 +70,15 @@ test("four-player room lifecycle works with numeric codes and private choices", 
     code: created.room.code,
     seat: "东",
     token: eastToken,
-    choiceIndex: 1,
-  });
-  assert.deepEqual(locked.selected, joined.candidates[1]);
+  }, () => 0.6);
+  assert.equal(locked.selected.origin, "厦门专属");
+  assert.ok(locked.selected.name);
 
   await assert.rejects(
     core.selectHex(repository, {
       code: created.room.code,
       seat: "东",
       token: eastToken,
-      choiceIndex: 0,
     }),
     /already_selected/,
   );
@@ -105,5 +104,5 @@ test("four-player room lifecycle works with numeric codes and private choices", 
   });
   assert.equal(restored.round, 2);
   assert.equal(restored.selected, null);
-  assert.equal(restored.candidates.length, 3);
+  assert.equal("candidates" in restored, false);
 });

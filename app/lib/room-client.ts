@@ -2,7 +2,7 @@ const functionNames = {
   mahjong_create_room: "create",
   mahjong_get_room: "get",
   mahjong_join_room: "join",
-  mahjong_select_hex: "select",
+  mahjong_draw_hex: "select",
   mahjong_next_round: "next",
 } as const;
 
@@ -14,7 +14,6 @@ const errorMessages: Record<string, string> = {
   already_selected: "本局海克斯已经锁定",
   host_verification_failed: "只有房主可以开始下一局",
   seat_verification_failed: "座位验证失败，请重新进入房间",
-  invalid_choice: "请选择一个有效的海克斯",
   network_error: "网络连接失败，请稍后重试",
 };
 
@@ -31,7 +30,6 @@ function requestData(name: keyof typeof functionNames, params: Record<string, un
       code: params.p_code,
       seat: params.p_seat,
       token: params.p_token,
-      choiceIndex: params.p_choice_index,
     };
   }
   return { action, code: params.p_code, hostToken: params.p_host_token };

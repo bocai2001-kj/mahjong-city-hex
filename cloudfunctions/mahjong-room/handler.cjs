@@ -15,7 +15,6 @@ function createHandler(repository, operations = defaultOperations) {
       code: event.code,
       seat: event.seat,
       token: event.token,
-      choiceIndex: event.choiceIndex,
     }),
     next: (event) => operations.nextRound(repository, {
       code: event.code,
