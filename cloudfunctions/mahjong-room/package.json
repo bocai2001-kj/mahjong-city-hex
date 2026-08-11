@@ -1,0 +1,9 @@
+{
+  "name": "mahjong-room",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "tencentcloud-sdk-nodejs-tcb": "4.1.288"
+  }
+}

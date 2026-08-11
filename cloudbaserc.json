@@ -1,0 +1,15 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "lyw599-d2gxronq4dd537da0",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "mahjong-room",
+      "runtime": "Nodejs20.19",
+      "handler": "index.main",
+      "timeout": 10,
+      "memorySize": 256,
+      "installDependency": true
+    }
+  ]
+}

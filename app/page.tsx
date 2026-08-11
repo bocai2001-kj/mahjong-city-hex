@@ -1,8 +1,9 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
 import { useCallback, useEffect, useState } from "react";
 import type { Effect, Mode, Rarity } from "./lib/game-data";
-import { rpc } from "./lib/supabase-public";
+import { rpc } from "./lib/room-client";
 
 type Seat = "东" | "南" | "西" | "北";
 
