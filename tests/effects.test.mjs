@@ -71,6 +71,34 @@ test("audit replacements remove the ten low-impact or duplicate effects", () => 
   for (const name of replacements) assert.equal(names.has(name), true, `replacement effect missing: ${name}`);
 });
 
+test("audit revisions strengthen and clarify sixteen disputed effects", () => {
+  const { entries } = allEntries();
+  const rulesByName = new Map(entries.map(([name, rules]) => [name, rules]));
+  const revised = new Map([
+    ["十三门", /四种.*牌墙尾.*交换/],
+    ["金色回廊", /牌河.*取回.*正常弃牌/],
+    ["龙津暗市", /东与西.*南与北.*双方均选择交易/],
+    ["金门渡口", /牌墙尾两张.*加入手牌.*正常弃牌/],
+    ["镜像装置", /通用海克斯.*获得一次同名效果的使用权.*不能复制/],
+    ["炼金牌", /指定另一种花色.*固定视为.*不能参与吃牌/],
+    ["双重回响", /第一次吃或碰.*牌墙尾两张.*交换.*正常弃牌/],
+    ["半自摸节拍", /放弃胡牌.*牌墙顶两张.*选择一张/],
+    ["盖宝预演", /庄家决定是否盖宝前.*两张随机手牌.*牌墙尾两张/],
+    ["抢杠警报", /宣布杠后.*牌墙尾两张.*选择一张作为.*补牌/],
+    ["盖宝密室", /盖宝失败.*海克斯持有者.*牌墙尾两张.*交换/],
+    ["十三奇谋", /六种不同幺九字牌.*只能胡十三幺.*牌墙顶与牌墙尾/],
+    ["鹭岛食客", /第一次吃牌.*上家两张随机手牌.*公开/],
+    ["白板侦察", /第一次.*摸到白板.*牌墙顶与牌墙尾.*交换/],
+    ["白板拓印", /公开一张.*作为样本.*固定视为样本牌/],
+    ["双游船票", /进入双游.*其余三家.*牌墙顶与牌墙尾.*决定.*摸取/],
+  ]);
+
+  assert.equal(rulesByName.has("白板万用章"), false);
+  for (const [name, pattern] of revised) {
+    assert.match(rulesByName.get(name) ?? "", pattern, `revision missing or unclear: ${name}`);
+  }
+});
+
 test("random draws cover universal and local pools at every rarity", () => {
   for (const mode of modes) {
     for (const rarity of rarities) {
