@@ -39,6 +39,38 @@ test("every effect is named, categorized, unique, and shield-free", () => {
   assert.ok(directScoreEffects.length <= 6, "direct score effects should remain a small minority");
 });
 
+test("audit replacements remove the ten low-impact or duplicate effects", () => {
+  const { entries } = allEntries();
+  const names = new Set(entries.map(([name]) => name));
+  const removed = [
+    "盖宝剧场",
+    "白鹭书院",
+    "先知",
+    "幺九罗盘",
+    "游金路标",
+    "龙津换客",
+    "分饼号令",
+    "金蝉脱壳",
+    "吃牌借位",
+    "三游归航",
+  ];
+  const replacements = [
+    "龙津擂台",
+    "白鹭主修课",
+    "岔路预感",
+    "幺九换轨",
+    "游金航标",
+    "龙津喊价",
+    "分饼洗牌",
+    "金蝉留壳",
+    "暗吃入席",
+    "三游导航",
+  ];
+
+  for (const name of removed) assert.equal(names.has(name), false, `retired effect remains: ${name}`);
+  for (const name of replacements) assert.equal(names.has(name), true, `replacement effect missing: ${name}`);
+});
+
 test("random draws cover universal and local pools at every rarity", () => {
   for (const mode of modes) {
     for (const rarity of rarities) {
