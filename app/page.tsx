@@ -277,7 +277,7 @@ export default function Home() {
               {candidates.map((candidate, index) => (
                 <button key={candidate.name} className={selectedIndex === index ? "choice-card selected" : "choice-card"} onClick={() => setSelectedIndex(index)}>
                   <span className="choice-number">{index + 1}</span>
-                  <span><strong>{candidate.name}</strong><small>{candidate.effect}</small><em>{candidate.origin}</em></span>
+                  <span><strong>{candidate.name}</strong><small>{candidate.effect}</small><em>{candidate.origin}{candidate.category ? ` · ${candidate.category}` : ""}</em></span>
                 </button>
               ))}
             </div>
@@ -290,6 +290,7 @@ export default function Home() {
             <p className="eyebrow">你的本局海克斯</p>
             <h2>{mySelection.name}</h2>
             <p>{mySelection.effect}</p>
+            {mySelection.category && <em>{mySelection.origin} · {mySelection.category}</em>}
             <span>等待其他玩家 · {completed}/4</span>
           </section>
         )}
