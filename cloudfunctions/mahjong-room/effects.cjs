@@ -128,6 +128,21 @@ const augments = {
   },
 };
 
+// Use everyday table language in player-facing copy.
+for (const entry of [
+  ...Object.values(cities).flat(),
+  ...Object.values(augments).flatMap((pool) => Object.values(pool).flat()),
+]) {
+  entry[1] = entry[1]
+    .replaceAll("正常弃牌", "正常出牌")
+    .replaceAll("新弃牌", "重新打出的牌")
+    .replaceAll("弃牌前", "出牌前")
+    .replaceAll("弃牌后", "出牌后")
+    .replaceAll("弃牌", "出牌")
+    .replaceAll("再弃一张", "再打出一张")
+    .replaceAll("各弃一张", "各打出一张");
+}
+
 const effect = ([name, text, origin, category]) => ({ name, effect: text, origin, category });
 const randomItem = (items, random = Math.random) => items[Math.floor(random() * items.length)];
 

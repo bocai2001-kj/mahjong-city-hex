@@ -66,6 +66,13 @@ test("every effect is named, categorized, unique, and shield-free", () => {
   assert.ok(directScoreEffects.length <= 6, "direct score effects should remain a small minority");
 });
 
+test("player-facing rules use 出牌 instead of the formal term 弃牌", () => {
+  const { entries } = allEntries();
+  for (const [name, rules] of entries) {
+    assert.doesNotMatch(rules, /弃牌/, `formal wording remains in: ${name}`);
+  }
+});
+
 test("audit replacements remove the ten low-impact or duplicate effects", () => {
   const { entries } = allEntries();
   const names = new Set(entries.map(([name]) => name));
@@ -103,12 +110,12 @@ test("audit revisions strengthen and clarify sixteen disputed effects", () => {
   const rulesByName = new Map(entries.map(([name, rules]) => [name, rules]));
   const revised = new Map([
     ["十三门", /四种.*牌墙尾.*交换/],
-    ["金色回廊", /牌河.*取回.*正常弃牌/],
+    ["金色回廊", /牌河.*取回.*正常出牌/],
     ["龙津暗市", /东与西.*南与北.*双方均选择交易/],
-    ["金门渡口", /牌墙尾两张.*加入手牌.*正常弃牌/],
+    ["金门渡口", /牌墙尾两张.*加入手牌.*正常出牌/],
     ["镜像装置", /通用海克斯.*获得一次同名效果的使用权.*不能复制/],
     ["炼金牌", /指定另一种花色.*固定视为.*不能参与吃牌/],
-    ["双重回响", /第一次吃或碰.*牌墙尾两张.*交换.*正常弃牌/],
+    ["双重回响", /第一次吃或碰.*牌墙尾两张.*交换.*正常出牌/],
     ["半自摸节拍", /放弃胡牌.*牌墙顶两张.*选择一张/],
     ["盖宝预演", /庄家决定是否盖宝前.*两张随机手牌.*牌墙尾两张/],
     ["抢杠警报", /宣布杠后.*牌墙尾两张.*选择一张作为.*补牌/],
