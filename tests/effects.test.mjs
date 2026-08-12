@@ -13,14 +13,41 @@ function allEntries() {
   return { cityEntries, augmentEntries, entries: [...cityEntries, ...augmentEntries] };
 }
 
-test("v2 catalog contains 18 cities and 54 augments", () => {
+test("v3 catalog contains 18 cities and 72 augments", () => {
   const { cityEntries, augmentEntries } = allEntries();
 
   assert.equal(cityEntries.length, 18);
-  assert.equal(augmentEntries.length, 54);
+  assert.equal(augmentEntries.length, 72);
   for (const pool of Object.values(catalogs.cities)) assert.equal(pool.length, 6);
   for (const pool of Object.values(catalogs.augments)) {
-    for (const rarity of rarities) assert.equal(pool[rarity].length, 6);
+    for (const rarity of rarities) assert.equal(pool[rarity].length, 8);
+  }
+});
+
+test("v3 adds two physical-table effects to every mode and rarity pool", () => {
+  const expected = {
+    universal: {
+      silver: ["旧货回收", "随机抽查"],
+      gold: ["顺手牵羊", "指定进货"],
+      prismatic: ["偷天换日", "任意货架"],
+    },
+    longyan: {
+      silver: ["分饼竞猜", "分饼留牌"],
+      gold: ["分饼替身", "金牌借路"],
+      prismatic: ["金牌转租", "游金追潮"],
+    },
+    xiamen: {
+      silver: ["延迟跟打", "白板回收"],
+      gold: ["跟打回响", "顺子改签"],
+      prismatic: ["游金截航", "三金续命"],
+    },
+  };
+
+  for (const [poolName, pools] of Object.entries(expected)) {
+    for (const [rarity, names] of Object.entries(pools)) {
+      const actualNames = new Set(catalogs.augments[poolName][rarity].map(([name]) => name));
+      for (const name of names) assert.equal(actualNames.has(name), true, `new effect missing: ${name}`);
+    }
   }
 });
 
