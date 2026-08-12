@@ -13,14 +13,55 @@ function allEntries() {
   return { cityEntries, augmentEntries, entries: [...cityEntries, ...augmentEntries] };
 }
 
-test("v3 catalog contains 18 cities and 72 augments", () => {
+test("v4 catalog contains 24 cities and 90 augments", () => {
   const { cityEntries, augmentEntries } = allEntries();
 
-  assert.equal(cityEntries.length, 18);
-  assert.equal(augmentEntries.length, 72);
-  for (const pool of Object.values(catalogs.cities)) assert.equal(pool.length, 6);
+  assert.equal(cityEntries.length, 24);
+  assert.equal(augmentEntries.length, 90);
+  for (const pool of Object.values(catalogs.cities)) assert.equal(pool.length, 8);
   for (const pool of Object.values(catalogs.augments)) {
-    for (const rarity of rarities) assert.equal(pool[rarity].length, 8);
+    for (const rarity of rarities) assert.equal(pool[rarity].length, 10);
+  }
+});
+
+test("v4 adds six cities and eighteen mission, river, or counterplay augments", () => {
+  const cityNames = new Set(Object.values(catalogs.cities).flat().map(([name]) => name));
+  for (const name of ["双向码头", "三色回收站", "分饼公证处", "盖宝观察席", "跟打转运站", "花港补给线"]) {
+    assert.equal(cityNames.has(name), true, `new city missing: ${name}`);
+  }
+
+  const expected = {
+    universal: {
+      silver: ["三色脚印", "静默观察"],
+      gold: ["故地重游", "以牙还牙"],
+      prismatic: ["回旋镖", "截断协议"],
+    },
+    longyan: {
+      silver: ["分饼伏笔", "盖宝旁听"],
+      gold: ["十三悬赏", "分饼反拍"],
+      prismatic: ["盖宝对赌", "金库钥匙"],
+    },
+    xiamen: {
+      silver: ["跟打伏笔", "花牌预约"],
+      gold: ["白板回声", "吃牌改口"],
+      prismatic: ["游金封航", "双游夺舵"],
+    },
+  };
+
+  for (const [poolName, pools] of Object.entries(expected)) {
+    for (const [rarity, names] of Object.entries(pools)) {
+      const actualNames = new Set(catalogs.augments[poolName][rarity].map(([name]) => name));
+      for (const name of names) assert.equal(actualNames.has(name), true, `new effect missing: ${name}`);
+    }
+  }
+
+  const addedNames = new Set([
+    ...["双向码头", "三色回收站", "分饼公证处", "盖宝观察席", "跟打转运站", "花港补给线"],
+    ...Object.values(expected).flatMap((pools) => Object.values(pools).flat()),
+  ]);
+  const { entries } = allEntries();
+  for (const [name, rules] of entries.filter(([name]) => addedNames.has(name))) {
+    assert.doesNotMatch(rules, /打出金|将金打出|弃金/, `new effect treats gold as a normal discard: ${name}`);
   }
 });
 
